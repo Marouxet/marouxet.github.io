@@ -14,4 +14,7 @@ _In this site, you will find some projects for both fields, mostly developed on 
 # Proyectos | _Projets_
 
 [Medir vibraciones con Python y MPU6050 | _Measuring vibration with Python and MPU6050_] (./vibPythonMPU.html).
+
+[Link title]({{ site.baseurl }}{% link page/index.html %})
+
 [Medir vibraciones con Python y MPU6050 | _Measuring vibration with Python and MPU6050_](./another-page.html).
