@@ -5,22 +5,33 @@ layout: default
 
 # Ondas estacionarias |_Measuring vibration with Python, Arduino and MPU6050 chip_
 
-[Full Repo](https://github.com/Marouxet/Acustica01)
+Utilizando la libraría _pyqtgraph_, generamos una animación de una onda senoidal impactando contra una discontinuidad caracterizada por su impedancia de borde. En el [Repositorio](https://github.com/Marouxet/Acustica01) hay 4 archivos para 4 diferentes versiones de impedancia de borde:
+
+* Impedancia Infinita 
+* Impedancia cero
+* Impedancia de material absorbente 
+* Impedancia de radiación
+
+En cada uno de los casos, se importan las librerías 
 
 ```python
-# Fragmento de código | Code Fragment
 
 from pyqtgraph.Qt import QtGui, QtCore 
 import numpy as np
 import pyqtgraph as pg
 import sys
-import pyaudio
 from fractions import Fraction as frac
+
+```
+
+
+Luego se define un objeto, llamado Plot2D, en cuyo método _init_ se configura la ventana de ploteo, los gráficos iniciales (llamados canvas), donde se cargan unas imágenes para ilustrar la condición de borde, se configuran ejes, unidades, etc.
+
+```python
 
 class Plot2D(object):
     
     def __init__(self):
-
 
         ## Imagen de fondo
         self.img = QtGui.QImage('002Zinf.png')
@@ -96,11 +107,61 @@ class Plot2D(object):
         self.canvas3.setXRange(-3.1, 1.5, padding=0)  
         self.canvas3.getAxis('bottom').setLabel('Distancia a la discontinuidad')
         self.canvas3.getAxis('left').setLabel('Velocidad')
+
+ ```
+Los otros métodos del programa son:
+
+_animation_ inicia el timer y lo configura para que cada un intervalo de 75 mS se ejecute el método _update_. Luego ejecuta el método _start_
+
+ ```python 
+ def animation(self):
+        timer = QtCore.QTimer()
+        timer.timeout.connect(self.update)
+        timer.start(75)
+        self.start()
+ ```
+
+_start_ inicia la aplicación (tomado de la documentación de pytqgraph)
+
+ ```python 
+    
     def start(self):
         if (sys.flags.interactive != 1) or not hasattr(QtCore, 'PYQT_VERSION'):
             QtGui.QApplication.instance().exec_()
+ ```
+ _update_ es el método que se ejecuta cada 75 ms. Define las señales seno y coseno. Cambia la fase en cada repetición y carga los valores en tres diccionarios (uno por gráfico), llamado _trace_, _trace2_, _trace3_. 
 
-            
+ ```python 
+ def update(self):
+        s = self.A*np.sin(2 * np.pi * self.f*(-self.t) + self.phase )
+        c = self.A*self.R*np.sin(2 * np.pi * self.f* self.t + self.phase + self.R_phase)
+        sume = s + c
+        s2 = np.power(s, 2)
+        c2 = np.power(c, 2)
+        sume2 = np.power(sume, 2)
+
+        
+        vel_inc=self.A*np.cos(2 * np.pi * self.f*(-self.t+10) + self.phase)
+        vel_ref=self.A*-self.R*np.cos(2 * np.pi * self.f* self.t + self.phase)
+        vel_sum = vel_inc+vel_ref
+        
+        
+        self.trace("inc", self.t, s)
+        self.trace("ref", self.t, c)
+        self.trace("sum", self.t, sume)
+        self.trace2("inc", self.t, s2)
+        self.trace2("ref", self.t, c2)
+        self.trace2("sum", self.t, sume2)
+        self.trace3("inc", self.t, vel_inc)
+        self.trace3("ref", self.t, vel_ref)
+        self.trace3("sum", self.t, vel_sum)
+        self.phase += 0.1
+
+ ```
+_trace_ son tres métodos, que leen la información del diccionario y la cargan en los ejes, actualizando la info cada 75 ms y generando la sensación de movilidad.
+
+ ```python
+
     def trace(self,name,dataset_x,dataset_y):
         if name in self.traces1:
             self.traces1[name].setData(dataset_x,dataset_y)
@@ -131,46 +192,15 @@ class Plot2D(object):
         elif name == "sum":
             self.traces3[name] = self.canvas3.plot(pen=pg.mkPen('k', width=2.5))
             
-    def update(self):
-        s = self.A*np.sin(2 * np.pi * self.f*(-self.t) + self.phase )
-        c = self.A*self.R*np.sin(2 * np.pi * self.f* self.t + self.phase + self.R_phase)
-        sume = s + c
-        s2 = np.power(s, 2)
-        c2 = np.power(c, 2)
-        sume2 = np.power(sume, 2)
+ ```
 
-        
-        vel_inc=self.A*np.cos(2 * np.pi * self.f*(-self.t+10) + self.phase)
-        vel_ref=self.A*-self.R*np.cos(2 * np.pi * self.f* self.t + self.phase)
-        vel_sum = vel_inc+vel_ref
-        
-        
-        self.trace("inc", self.t, s)
-        self.trace("ref", self.t, c)
-        self.trace("sum", self.t, sume)
-        self.trace2("inc", self.t, s2)
-        self.trace2("ref", self.t, c2)
-        self.trace2("sum", self.t, sume2)
-        self.trace3("inc", self.t, vel_inc)
-        self.trace3("ref", self.t, vel_ref)
-        self.trace3("sum", self.t, vel_sum)
-        self.phase += 0.1
-        
-        
-    def animation(self):
-        timer = QtCore.QTimer()
-        timer.timeout.connect(self.update)
-        timer.start(75)
-        self.start()
-        
+Por último, se instancia un objeto _Plot2D()_ y se llama a animation para comenzar
 
+ ```python
 p = Plot2D()
 p.animation()
 
 
-
 ```
-
-_yay_
 
 [back](./)
