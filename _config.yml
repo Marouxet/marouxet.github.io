@@ -1,6 +1,6 @@
 title: Mariano Arouet
 logo: /assets/img/foto.jpeg
 description: \n Porfolio 
-show_downloads: true
+show_downloads: false
 google_analytics:
 theme: jekyll-theme-minimal
