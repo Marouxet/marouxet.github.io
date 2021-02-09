@@ -1,7 +1,7 @@
 ---
 layout: default
 ---
-# Hola | _Hi_
+# Hola | _Hello_
 
 Mi nombre es Mariano y soy Ingeniero de Sonido. Soy docente de Acústica en la Universidad Nacional de Tres de Febrero y estoy orientado al Procesamiento Digital de Señales y Análisis de Datos.
 
@@ -11,7 +11,7 @@ _My name is Mariano and I am a Sound Engineer. I am professor of Acoustics at th
 
 _In this site, you will find some projects in both fields, mostly developed on Python, MATLAB, Arduino_
 
-# Proyectos | _Projets_
+# Proyectos | _Projects_
 
 
 
@@ -20,5 +20,6 @@ _Measuring vibrations with Python and MPU 6050 MEMS acelerometer_
 
 
 
-[Onda estacionarias con diferentes condiciones de borde](http://marouxet.github.io/estacionarias).
+[Simulación de ondas planas estacionarias en Python](http://marouxet.github.io/estacionarias).
+_Simulation of stationary plane waves in python_
 
