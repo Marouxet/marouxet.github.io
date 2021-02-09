@@ -3,7 +3,7 @@ layout: default
 ---
 
 
-# Ondas estacionarias |_Measuring vibration with Python, Arduino and MPU6050 chip_
+# Ondas estacionarias |_Stationary waves_
 
 Utilizando la libraría _pyqtgraph_, generamos una animación de una onda senoidal impactando contra una discontinuidad caracterizada por su impedancia de borde. En el [Repositorio](https://github.com/Marouxet/Acustica01) hay 4 archivos para 4 diferentes versiones de impedancia de borde:
 
@@ -15,7 +15,6 @@ Utilizando la libraría _pyqtgraph_, generamos una animación de una onda senoid
 En cada uno de los casos, se importan las librerías 
 
 ```python
-
 from pyqtgraph.Qt import QtGui, QtCore 
 import numpy as np
 import pyqtgraph as pg
@@ -28,7 +27,6 @@ from fractions import Fraction as frac
 Luego se define un objeto, llamado Plot2D, en cuyo método _init_ se configura la ventana de ploteo, los gráficos iniciales (llamados canvas), donde se cargan unas imágenes para ilustrar la condición de borde, se configuran ejes, unidades, etc.
 
 ```python
-
 class Plot2D(object):
     
     def __init__(self):
@@ -124,7 +122,6 @@ _animation_ inicia el timer y lo configura para que cada un intervalo de 75 mS s
 _start_ inicia la aplicación (tomado de la documentación de pytqgraph)
 
  ```python 
-    
     def start(self):
         if (sys.flags.interactive != 1) or not hasattr(QtCore, 'PYQT_VERSION'):
             QtGui.QApplication.instance().exec_()
@@ -161,7 +158,6 @@ _start_ inicia la aplicación (tomado de la documentación de pytqgraph)
 _trace_ son tres métodos, que leen la información del diccionario y la cargan en los ejes, actualizando la info cada 75 ms y generando la sensación de movilidad.
 
  ```python
-
     def trace(self,name,dataset_x,dataset_y):
         if name in self.traces1:
             self.traces1[name].setData(dataset_x,dataset_y)
@@ -190,10 +186,8 @@ _trace_ son tres métodos, que leen la información del diccionario y la cargan 
         elif name == "ref":
             self.traces3[name] = self.canvas3.plot(pen=pg.mkPen('g', width=2, style=QtCore.Qt.DashLine))
         elif name == "sum":
-            self.traces3[name] = self.canvas3.plot(pen=pg.mkPen('k', width=2.5))
-            
+            self.traces3[name] = self.canvas3.plot(pen=pg.mkPen('k', width=2.5))         
  ```
-
 Por último, se instancia un objeto _Plot2D()_ y se llama a animation para comenzar
 
  ```python
