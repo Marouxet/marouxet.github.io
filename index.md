@@ -15,5 +15,9 @@ _In this site, you'll find some projects for both fields, mostly developed on Py
 
 
 
-[Medición de vibraciones usando Python y MPU 6050](http://marouxet.github.io/vibpythonMPU).
-[Link to another page](./another-page.html).
+[Medición de vibraciones usando Python y acelerómetro mems MPU 6050](http://marouxet.github.io/vibPythonMPU).
+_Measuring vibrations with Python and MPU 6050 MEMS acelerometer_
+
+
+
+[Onda estacionarias con diferentes condiciones de borde](http://marouxet.github.io/vibPythonMPU).
