@@ -1,14 +1,8 @@
 title: Mariano Arouet
 logo: /assets/img/foto.jpeg
-description: \n Porfolio 
-show_downloads: true
+description: Porfolio 
+show_downloads: false
 google_analytics:
 theme: jekyll-theme-minimal
 baseurl: "" # the subpath of your site, e.g. /blog
 url: "" # the base hostname & protocol for your site, e.g. http://example.com
-twitter_username: jekyllrb
-github_username:  jekyll
-plugins:
-  - jekyll-feed
-  values:
-      author_profile: true
