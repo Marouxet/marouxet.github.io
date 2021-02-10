@@ -13,7 +13,20 @@ El proyecto consiste en un sistema masa-resorte al que se puede estudiar de mane
 * Poder medir aceleraciones utilizando el chip MPU-6050 comandado por un Arduino UNO mediante una interface gráfica hecha en Python, usando el framework Kivy.
 * Excitar el dispositivo a diferentes frecuenccias mediante un motor DC, cuya velocidad se puede variar desde la misma interface gráfica.
 
+
+Animación del funcionamiento libre
+
+![GifPrincipal](https://media.giphy.com/media/wLs5htqWhpljnygy1g/giphy.gif)
+
+
+
 El arduino, el mems y el proyecto original fueron ~~prestadps~~ regalados por [Facundo Ramón](https://www.linkedin.com/in/facundo-ramon/), que utilizó el dispostivo para su tesis de grado. Originalmente él hizo una interface en Processing, que no terminé usando, y un sistema de comunicación serial con Arduino que me sirvió de base para este proyecto. Gracias Facu!
+
+Algunas fotos del sistema
+
+![Arduino](./assets/img/arduino.jpg)
+![Acelerometro](./assets/img/acelerometro.jpg)
+![Acelerometro2](./assets/img/acelerometro2.jpg)
 
 ## El código en Arduino
 
@@ -285,8 +298,25 @@ class serialPlot:
         print('Disconnected...')
 
 ```
+## GUI : Kivy Garden
+
+Para la interface gráfica utilicé el framework Kivy, que ya venía usando para otros proyectos. Tiene una serie de desarrollos muy interesantes para hacer aplicaciones que son multiplataforma (Windows, Linux, macOS, Android, iOS). Básicamente se trata de un conjunto de Widgets con determinadas funciones.
+
+Interfaz Gráfica
+
+![Interface](./assets/img/interface.png)
 
 
-_yay_
+La página oficial del proyecto Kivy es esta : https://kivy.org
+El repo en Github: https://github.com/kivy/kivy
+También utilicé Kivy Garden, un proyecto no oficial complementario a Kivy con varias “Flowers” (Widgets) interesantes: https://kivy-garden.github.io/
+
+A su vez, recomiendo el Canal de Youtube de Erik Sandberg, que fue lo que utilicé yo para comenzar con Kivy.
+
+La aplicación está basada en un Widget de Garden llamado Graph y en un timer llamado Kivy-Clock. En el thread principal voy actualizando los diferentes gráficos con los datos que almaceno en una variable desde el thread de serialización.
+
+El código de la interface gráfica está hecho en un formato llamado Lenguage Kv, que podemos considerar una especie de CSS para nuestro PHP que sería Python. Con el lenguaje Kv podemos separar la lógica del diseño, lo cual me parece conveniente.
+
+
 
 [back](./)
