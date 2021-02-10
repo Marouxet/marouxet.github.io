@@ -23,3 +23,6 @@ _Measuring vibrations with Python and MPU 6050 MEMS acelerometer_
 [Simulación de ondas planas estacionarias en Python](http://marouxet.github.io/estacionarias).
 _Simulation of stationary plane waves in python_
 
+
+
+[Measuring Sound Scattering Coefficient according ISO 17497-1 on MATLAB](http://marouxet.github.io/tesis)
