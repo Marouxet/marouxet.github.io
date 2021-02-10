@@ -12,9 +12,8 @@ This software is the result of my degree thesis for became a sound engineer in t
 [Full Repository](https://github.com/Marouxet/SoundScatteringCoeff)
 
 
-### Some data about this coefficient:
+[Some data about this coefficient](https://www.researchgate.net/publication/233688510_A_Tutorial_on_Scattering_and_Diffusion_Coefficients_for_Room_Acoustic_Surfaces)
 
-* https://www.researchgate.net/publication/233688510_A_Tutorial_on_Scattering_and_Diffusion_Coefficients_for_Room_Acoustic_Surfaces
 
 
 ### Abstract

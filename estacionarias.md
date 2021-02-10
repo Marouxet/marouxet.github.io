@@ -14,7 +14,21 @@ Utilizando la libraría _pyqtgraph_, generamos una animación de una onda senoid
 
 ## Ejemplos de las simulaciones obtenidas
 
+Impedancia infinita
 ![Impedancia Infinita](./assets/img/01Zinf.gif)
+
+Impedancia Nula
+![Impedancia Infinita](./assets/img/02Z0.gif)
+
+Impedancia de un material absorbente
+
+![Impedancia Infinita](./assets/img/03Zabs.gif)
+
+Impedancia de radiación 
+
+![Impedancia Infinita](./assets/img/04Zrad.gif)
+
+## Sobre el código
 
 En cada uno de los casos, se importan las librerías 
 
