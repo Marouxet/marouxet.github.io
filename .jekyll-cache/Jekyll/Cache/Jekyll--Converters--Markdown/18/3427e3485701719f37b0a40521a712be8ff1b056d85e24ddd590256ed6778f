@@ -1,0 +1,317 @@
+I"-�<h1 id="medición-de-vibraciones-usando-python-arduino-y-el-mems-mpu6050-measuring-vibration-with-python-arduino-and-mpu6050-chip">Medición de vibraciones usando Python, Arduino y el MEMS MPU6050 |<em>Measuring vibration with Python, Arduino and MPU6050 chip</em></h1>
+
+<p>En este post describiré un proyecto que realicé durante la cuarentena por la pandemia de COVID-19. Se trata de un dispositivo low-cost que nos ayuda a estudiar sistemas vibratorios de un grado de libertad, fenómenos como resonancia, armotiguación, rigidez de resortes, transmisibilidad.</p>
+
+<p>El proyecto consiste en un sistema masa-resorte al que se puede estudiar de manera libre o de manera forzada. El dispositivo fue pensado para poder dar clases de Acústica, y estudiar sistemas masa-resortes con un objeto real. Tiene dos objetivos principales:</p>
+
+<ul>
+  <li>Poder medir aceleraciones utilizando el chip MPU-6050 comandado por un Arduino UNO mediante una interface gráfica hecha en Python, usando el framework Kivy.</li>
+  <li>Excitar el dispositivo a diferentes frecuenccias mediante un motor DC, cuya velocidad se puede variar desde la misma interface gráfica.</li>
+</ul>
+
+<p>Animación del funcionamiento libre</p>
+
+<p><img src="https://media.giphy.com/media/wLs5htqWhpljnygy1g/giphy.gif" alt="GifPrincipal" /></p>
+
+<p>El arduino, el mems y el proyecto original fueron <del>prestadps</del> regalados por <a href="https://www.linkedin.com/in/facundo-ramon/">Facundo Ramón</a>, que utilizó el dispostivo para su tesis de grado. Originalmente él hizo una interface en Processing, que no terminé usando, y un sistema de comunicación serial con Arduino que me sirvió de base para este proyecto. Gracias Facu!</p>
+
+<p>Algunas fotos del sistema</p>
+
+<p><img src="./assets/img/arduino.jpg" alt="Arduino" />
+<img src="./assets/img/acelerometro.jpg" alt="Acelerometro" />
+<img src="./assets/img/acelerometro2.jpg" alt="Acelerometro2" /></p>
+
+<h2 id="el-código-en-arduino">El código en Arduino</h2>
+
+<p>Mediante arduino leemos la información que genera el MPU6050 y la enviamos por el puerto USB hacia la PC. Además, tomamos de la PC comandos serie para iniciar la captura de datos, detenerla y cambiar la velocidad de rotación del motor. Para esto utilizamos las librerías I2Cdev.h y MPU6050.h, que me simplificaron muchísimo el trabajo.</p>
+
+<p>Para comenzar desde cero con el manejor del chicp MPU6050 con arduino, recomiendo fuértemente los posteos de luisllamas. Estos son particularmente de ayuda:</p>
+
+<p>https://www.luisllamas.es/arduino-orientacion-imu-mpu-6050/
+https://www.luisllamas.es/medir-la-inclinacion-imu-arduino-filtro-complementario/</p>
+
+<p>Por otro lado, para manejar la velocidad del motor DC por PWM utilizé el driver L298N. Pueden encontrar información sobre esto, por ejemplo, acá:</p>
+
+<p>https://howtomechatronics.com/tutorials/arduino/arduino-dc-motor-control-tutorial-l298n-pwm-h-bridge/</p>
+
+<h2 id="en-qué-consiste-el-código">¿En qué consiste el código?</h2>
+
+<ul>
+  <li>
+    <p>en Setup configuramos las entradas y salidas de arduino (tanto para el MPU6050 como para el L298N), la comunicación i2c con el MPU6050, la comunicación serie con Python.</p>
+  </li>
+  <li>
+    <p>en Loop simplemente tomamos información por i2c desde el MPU6050 y la enviamos por el puerto serie en crudo (es decir en forma de bytes). Esto lo decidí para realizar todo el procesamiento directamente en python.</p>
+  </li>
+  <li>
+    <p>Mediante el SerialEvent se realiza toda la comunicación con la pc. Recibimos 3 posibles caracteres por el puerto serie: ‘r’ indica read, ‘s’ indica stop y ‘v’ indica cambio de velocidad mediante unas variables logicas direcciona el flujo del programa dentro de loop.
+El control de velocidad con PWM lo hacemos recibiendo un número entre 0 y 255 desde python (en realidad luego acoté el rango de 80 a 120 por el funcionamiento específico de mi motor) y escribiéndolo directamente en la salida digital que va conectada al driver.</p>
+  </li>
+</ul>
+
+<div class="language-c++ highlighter-rouge"><div class="highlight"><pre class="highlight"><code>
+<span class="cp">#include "I2Cdev.h"
+#include "MPU6050.h"
+</span> 
+<span class="c1">// Arduino Wire library is required if I2Cdev I2CDEV_ARDUINO_WIRE implementation</span>
+<span class="c1">// is used in I2Cdev.h</span>
+<span class="cp">#if I2CDEV_IMPLEMENTATION == I2CDEV_ARDUINO_WIRE
+</span>    <span class="cp">#include "Wire.h"
+#endif
+</span> 
+<span class="n">MPU6050</span> <span class="n">accelgyro</span><span class="p">;</span>
+ 
+<span class="kt">int16_t</span> <span class="n">ax</span><span class="p">,</span> <span class="n">ay</span><span class="p">,</span> <span class="n">az</span><span class="p">;</span>
+<span class="kt">int16_t</span> <span class="n">gx</span><span class="p">,</span> <span class="n">gy</span><span class="p">,</span> <span class="n">gz</span><span class="p">;</span>
+ 
+<span class="kt">bool</span> <span class="n">measure</span> <span class="o">=</span> <span class="nb">false</span><span class="p">;</span>
+<span class="kt">bool</span> <span class="n">changeVel</span> <span class="o">=</span> <span class="nb">false</span><span class="p">;</span>
+ 
+ 
+<span class="c1">// Salidas para PWM para el L298N</span>
+<span class="kt">int</span> <span class="n">IN3</span> <span class="o">=</span> <span class="mi">5</span><span class="p">;</span>    <span class="c1">// Input3 conectada al pin 5</span>
+<span class="kt">int</span> <span class="n">IN4</span> <span class="o">=</span> <span class="mi">4</span><span class="p">;</span>    <span class="c1">// Input4 conectada al pin 4 </span>
+<span class="kt">int</span> <span class="n">ENB</span> <span class="o">=</span> <span class="mi">6</span><span class="p">;</span>    <span class="c1">// ENB conectada al pin 3 de Arduino</span>
+ 
+<span class="kt">int</span> <span class="n">velocidad</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+ 
+<span class="cp">#define OUTPUT_BINARY_ACCELGYRO
+#define LED_PIN 13
+</span><span class="kt">bool</span> <span class="n">blinkState</span> <span class="o">=</span> <span class="nb">false</span><span class="p">;</span>
+ 
+<span class="kt">void</span> <span class="nf">setup</span><span class="p">()</span> <span class="p">{</span>
+ 
+ 
+ 
+    <span class="c1">// join I2C bus (I2Cdev library doesn't do this automatically)</span>
+    <span class="cp">#if I2CDEV_IMPLEMENTATION == I2CDEV_ARDUINO_WIRE
+</span>        <span class="n">Wire</span><span class="p">.</span><span class="n">begin</span><span class="p">();</span>
+    <span class="cp">#elif I2CDEV_IMPLEMENTATION == I2CDEV_BUILTIN_FASTWIRE
+</span>        <span class="n">Fastwire</span><span class="o">::</span><span class="n">setup</span><span class="p">(</span><span class="mi">400</span><span class="p">,</span> <span class="nb">true</span><span class="p">);</span>
+    <span class="cp">#endif
+</span> 
+    <span class="c1">// initialize serial communication</span>
+    <span class="n">Serial</span><span class="p">.</span><span class="n">begin</span><span class="p">(</span><span class="mi">115200</span><span class="p">);</span>
+ 
+    <span class="c1">// initialize device</span>
+    <span class="c1">// Serial.println("Initializing I2C devices...");</span>
+    <span class="n">accelgyro</span><span class="p">.</span><span class="n">initialize</span><span class="p">();</span>
+ 
+    <span class="c1">// verify connection</span>
+    <span class="n">Serial</span><span class="p">.</span><span class="n">println</span><span class="p">(</span><span class="n">accelgyro</span><span class="p">.</span><span class="n">testConnection</span><span class="p">()</span> <span class="o">?</span> <span class="s">"_OK_"</span> <span class="o">:</span> <span class="s">"MPU6050 UNTREF failed"</span><span class="p">);</span>
+    <span class="n">accelgyro</span><span class="p">.</span><span class="n">setXAccelOffset</span><span class="p">(</span><span class="mi">1596</span><span class="p">);</span>
+
+ 
+   <span class="c1">// configure Arduino LED pin for output</span>
+   <span class="n">pinMode</span> <span class="p">(</span><span class="n">ENB</span><span class="p">,</span> <span class="n">OUTPUT</span><span class="p">);</span> 
+   <span class="n">pinMode</span> <span class="p">(</span><span class="n">IN3</span><span class="p">,</span> <span class="n">OUTPUT</span><span class="p">);</span>
+   <span class="n">pinMode</span> <span class="p">(</span><span class="n">IN4</span><span class="p">,</span> <span class="n">OUTPUT</span><span class="p">);</span>
+  
+  <span class="n">digitalWrite</span> <span class="p">(</span><span class="n">IN3</span><span class="p">,</span> <span class="n">HIGH</span><span class="p">);</span>
+  <span class="n">digitalWrite</span> <span class="p">(</span><span class="n">IN4</span><span class="p">,</span> <span class="n">LOW</span><span class="p">);</span>
+<span class="p">}</span>
+ 
+<span class="kt">void</span> <span class="nf">loop</span><span class="p">()</span> <span class="p">{</span>
+   
+   
+<span class="k">if</span><span class="p">(</span><span class="n">measure</span><span class="p">){</span>
+
+    <span class="n">accelgyro</span><span class="p">.</span><span class="n">getMotion6</span><span class="p">(</span><span class="o">&amp;</span><span class="n">ax</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">ay</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">az</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">gx</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">gy</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">gz</span><span class="p">);</span>
+
+    <span class="cp">#ifdef OUTPUT_BINARY_ACCELGYRO
+</span>      <span class="n">Serial</span><span class="p">.</span><span class="n">write</span><span class="p">((</span><span class="kt">uint8_t</span><span class="p">)(</span><span class="n">ax</span> <span class="o">&gt;&gt;</span> <span class="mi">8</span><span class="p">));</span> <span class="n">Serial</span><span class="p">.</span><span class="n">write</span><span class="p">((</span><span class="kt">uint8_t</span><span class="p">)(</span><span class="n">ax</span> <span class="o">&amp;</span> <span class="mh">0xFF</span><span class="p">));</span>
+      <span class="n">Serial</span><span class="p">.</span><span class="n">write</span><span class="p">((</span><span class="kt">uint8_t</span><span class="p">)(</span><span class="n">az</span> <span class="o">&gt;&gt;</span> <span class="mi">8</span><span class="p">));</span> <span class="n">Serial</span><span class="p">.</span><span class="n">write</span><span class="p">((</span><span class="kt">uint8_t</span><span class="p">)(</span><span class="n">az</span> <span class="o">&amp;</span> <span class="mh">0xFF</span><span class="p">));</span>
+      <span class="n">Serial</span><span class="p">.</span><span class="n">write</span><span class="p">((</span><span class="kt">uint8_t</span><span class="p">)(</span><span class="n">gy</span> <span class="o">&gt;&gt;</span> <span class="mi">8</span><span class="p">));</span> <span class="n">Serial</span><span class="p">.</span><span class="n">write</span><span class="p">((</span><span class="kt">uint8_t</span><span class="p">)(</span><span class="n">gy</span> <span class="o">&amp;</span> <span class="mh">0xFF</span><span class="p">));</span>
+    <span class="cp">#endif
+</span> 
+ 
+<span class="p">}</span>
+ 
+<span class="k">else</span><span class="p">{</span>
+   
+  <span class="n">measure</span> <span class="o">=</span> <span class="nb">true</span><span class="p">;</span>
+  <span class="p">}</span>
+ 
+ 
+<span class="p">}</span>
+ 
+<span class="kt">void</span> <span class="nf">serialEvent</span><span class="p">()</span> <span class="p">{</span>
+ 
+  <span class="kt">char</span> <span class="n">inChar</span> <span class="o">=</span> <span class="p">(</span><span class="kt">char</span><span class="p">)</span><span class="n">Serial</span><span class="p">.</span><span class="n">read</span><span class="p">();</span>
+   
+  <span class="k">switch</span> <span class="p">(</span><span class="n">inChar</span><span class="p">)</span> <span class="p">{</span>
+    <span class="k">case</span> <span class="sc">'r'</span><span class="p">:</span> <span class="c1">//run</span>
+     
+      <span class="n">measure</span> <span class="o">=</span> <span class="nb">true</span><span class="p">;</span>
+      <span class="n">digitalWrite</span> <span class="p">(</span><span class="n">IN3</span><span class="p">,</span> <span class="n">HIGH</span><span class="p">);</span>
+      <span class="n">digitalWrite</span> <span class="p">(</span><span class="n">IN4</span><span class="p">,</span> <span class="n">LOW</span><span class="p">);</span>
+      <span class="k">break</span><span class="p">;</span>
+      
+    <span class="k">case</span> <span class="sc">'s'</span><span class="p">:</span> <span class="c1">//stop</span>
+     
+      <span class="n">measure</span> <span class="o">=</span> <span class="nb">false</span><span class="p">;</span>
+      <span class="n">digitalWrite</span> <span class="p">(</span><span class="n">IN3</span><span class="p">,</span> <span class="n">LOW</span><span class="p">);</span>
+      <span class="n">digitalWrite</span> <span class="p">(</span><span class="n">IN4</span><span class="p">,</span> <span class="n">LOW</span><span class="p">);</span>
+      <span class="k">break</span><span class="p">;</span>
+ 
+     <span class="k">case</span> <span class="sc">'v'</span><span class="p">:</span>
+      
+       <span class="kt">int</span> <span class="n">velocidad</span><span class="o">=</span> <span class="n">Serial</span><span class="p">.</span><span class="n">parseInt</span><span class="p">();</span>
+       <span class="n">analogWrite</span><span class="p">(</span><span class="n">ENB</span><span class="p">,</span><span class="n">velocidad</span><span class="p">);</span>
+       <span class="n">measure</span> <span class="o">=</span> <span class="nb">false</span><span class="p">;</span>
+       <span class="k">break</span><span class="p">;</span> 
+  <span class="p">}</span>
+   
+<span class="p">}</span>
+
+</code></pre></div></div>
+
+<h2 id="lectura-de-datos-series-desde-python">Lectura de datos series desde Python</h2>
+
+<p>Luego de varias pruebas, decidí utilizar un thread independiente para la lectura de datos serie. La idea de este proceso es que la lectura de datos funcione en paralelo con la interface gráfica para evitar la pérdida de datos o problemas de sincronización. En realidad las actividades no van en paralelo sino son seriales, pero eso lo administra python y para nosotros van a la vez. Usé como base un posteo de <a href="https://thepoorengineer.com/en/arduino-python-plot/#python">The Poor Engineer</a> para graficar lecturas seriales en Python usando Matplotlib. En mi caso utilizo Kivy como framework para la interface gráfica, por lo que adapté el código para eso.</p>
+
+<p>El script serialMPU.py se encarga de la comunicación. La clase SerialPlot genera la comunicación (indicamos Baudrate, formato de la información, puerto, etc.) y con el método readSerialStart iniciamos el Thread en paralelo. Lo que se ejecuta en paralelo es el método backgroundThread, mediante el cual se leen constantemente datos serie y se los guarda en una variable.</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">from</span> <span class="nn">threading</span> <span class="kn">import</span> <span class="n">Thread</span>
+<span class="kn">import</span> <span class="nn">serial</span>
+<span class="kn">import</span> <span class="nn">time</span>
+<span class="kn">import</span> <span class="nn">collections</span>
+<span class="kn">import</span> <span class="nn">struct</span>
+<span class="kn">import</span> <span class="nn">copy</span>
+<span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="n">np</span>
+   
+<span class="k">class</span> <span class="nc">serialPlot</span><span class="p">:</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">serialPort</span><span class="o">=</span><span class="s">'/dev/ttyACM0'</span><span class="p">,</span> <span class="n">serialBaud</span><span class="o">=</span><span class="mi">38400</span><span class="p">,</span> <span class="n">dataNumBytes</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">numPlots</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">rango</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">sensibilidad</span> <span class="o">=</span> <span class="mi">2</span><span class="o">**</span><span class="mi">16</span><span class="p">):</span>
+        <span class="c1"># Filtado exponencial
+</span>        <span class="bp">self</span><span class="p">.</span><span class="n">EMA_LP</span> <span class="o">=</span> <span class="mi">0</span> <span class="c1"># Valor inicial del filtrado
+</span>        <span class="bp">self</span><span class="p">.</span><span class="n">EMA_LP2</span> <span class="o">=</span> <span class="mi">0</span> <span class="c1"># Valor inicial del filtrado
+</span>        <span class="bp">self</span><span class="p">.</span><span class="n">EMA_LP3</span> <span class="o">=</span> <span class="mi">0</span> <span class="c1"># Valor inicial del filtrado
+</span>        <span class="bp">self</span><span class="p">.</span><span class="n">EMA_ALPHA</span> <span class="o">=</span> <span class="mf">0.9</span> <span class="c1"># Coeficiente para el filtro 
+</span>         
+        <span class="bp">self</span><span class="p">.</span><span class="n">corregir</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="bp">self</span><span class="p">.</span><span class="n">port</span> <span class="o">=</span> <span class="n">serialPort</span>
+        <span class="bp">self</span><span class="p">.</span><span class="n">baud</span> <span class="o">=</span> <span class="n">serialBaud</span>
+        <span class="bp">self</span><span class="p">.</span><span class="n">dataNumBytes</span> <span class="o">=</span> <span class="n">dataNumBytes</span>
+        <span class="bp">self</span><span class="p">.</span><span class="n">numPlots</span> <span class="o">=</span> <span class="n">numPlots</span>
+        <span class="bp">self</span><span class="p">.</span><span class="n">rango</span> <span class="o">=</span> <span class="n">rango</span>
+        <span class="bp">self</span><span class="p">.</span><span class="n">sensibilidad</span> <span class="o">=</span> <span class="n">sensibilidad</span>
+        <span class="bp">self</span><span class="p">.</span><span class="n">rawData</span> <span class="o">=</span> <span class="nb">bytearray</span><span class="p">(</span><span class="n">dataNumBytes</span><span class="p">)</span>
+        <span class="bp">self</span><span class="p">.</span><span class="n">rawData2</span> <span class="o">=</span> <span class="nb">bytearray</span><span class="p">(</span><span class="n">dataNumBytes</span><span class="p">)</span>
+        <span class="bp">self</span><span class="p">.</span><span class="n">rawData3</span> <span class="o">=</span> <span class="nb">bytearray</span><span class="p">(</span><span class="n">dataNumBytes</span><span class="p">)</span>
+        <span class="bp">self</span><span class="p">.</span><span class="n">dataType</span> <span class="o">=</span> <span class="bp">None</span>
+        <span class="k">if</span> <span class="n">dataNumBytes</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
+            <span class="bp">self</span><span class="p">.</span><span class="n">dataType</span> <span class="o">=</span> <span class="s">'h'</span>     <span class="c1"># 2 byte integer
+</span>        <span class="k">elif</span> <span class="n">dataNumBytes</span> <span class="o">==</span> <span class="mi">4</span><span class="p">:</span>
+            <span class="bp">self</span><span class="p">.</span><span class="n">dataType</span> <span class="o">=</span> <span class="s">'f'</span>     <span class="c1"># 4 byte float
+</span>        <span class="bp">self</span><span class="p">.</span><span class="n">data</span> <span class="o">=</span> <span class="p">[]</span>
+        
+        <span class="bp">self</span><span class="p">.</span><span class="n">isRun</span> <span class="o">=</span> <span class="bp">True</span>
+        <span class="bp">self</span><span class="p">.</span><span class="n">isReceiving</span> <span class="o">=</span> <span class="bp">False</span>
+        <span class="bp">self</span><span class="p">.</span><span class="n">thread</span> <span class="o">=</span> <span class="bp">None</span>
+        <span class="bp">self</span><span class="p">.</span><span class="n">plotTimer</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="bp">self</span><span class="p">.</span><span class="n">previousTimer</span> <span class="o">=</span> <span class="mi">0</span>
+       
+        <span class="k">print</span><span class="p">(</span><span class="s">'Trying to connect to: '</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">serialPort</span><span class="p">)</span> <span class="o">+</span> <span class="s">' at '</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">serialBaud</span><span class="p">)</span> <span class="o">+</span> <span class="s">' BAUD.'</span><span class="p">)</span>
+        <span class="k">try</span><span class="p">:</span>
+            
+            <span class="bp">self</span><span class="p">.</span><span class="n">serialConnection</span> <span class="o">=</span> <span class="n">serial</span><span class="p">.</span><span class="n">Serial</span><span class="p">(</span><span class="n">serialPort</span><span class="p">,</span> <span class="n">serialBaud</span><span class="p">,</span> <span class="n">timeout</span><span class="o">=</span><span class="mi">4</span><span class="p">)</span>
+            <span class="k">print</span><span class="p">(</span><span class="s">'Connected to '</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">serialPort</span><span class="p">)</span> <span class="o">+</span> <span class="s">' at '</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">serialBaud</span><span class="p">)</span> <span class="o">+</span> <span class="s">' BAUD.'</span><span class="p">)</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="k">print</span><span class="p">(</span><span class="s">"Failed to connect with "</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">serialPort</span><span class="p">)</span> <span class="o">+</span> <span class="s">' at '</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">serialBaud</span><span class="p">)</span> <span class="o">+</span> <span class="s">' BAUD.'</span><span class="p">)</span>
+  
+    <span class="k">def</span> <span class="nf">readSerialStart</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+         
+        <span class="k">if</span> <span class="bp">self</span><span class="p">.</span><span class="n">thread</span> <span class="o">==</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="p">.</span><span class="n">valores</span><span class="o">=</span><span class="p">[]</span>
+            <span class="bp">self</span><span class="p">.</span><span class="n">valores2</span><span class="o">=</span><span class="p">[]</span>
+            <span class="bp">self</span><span class="p">.</span><span class="n">thread</span> <span class="o">=</span> <span class="n">Thread</span><span class="p">(</span><span class="n">target</span><span class="o">=</span><span class="bp">self</span><span class="p">.</span><span class="n">backgroundThread</span><span class="p">)</span>
+            <span class="bp">self</span><span class="p">.</span><span class="n">thread</span><span class="p">.</span><span class="n">start</span><span class="p">()</span>
+            <span class="c1"># Block till we start receiving values
+</span>            <span class="k">while</span> <span class="bp">self</span><span class="p">.</span><span class="n">isReceiving</span> <span class="o">!=</span> <span class="bp">True</span><span class="p">:</span>
+                <span class="n">time</span><span class="p">.</span><span class="n">sleep</span><span class="p">(</span><span class="mf">0.1</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">a</span> <span class="o">=</span> <span class="mi">1</span>
+  
+ 
+    <span class="k">def</span> <span class="nf">backgroundThread</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>    <span class="c1"># retrieve data
+</span>        <span class="n">time</span><span class="p">.</span><span class="n">sleep</span><span class="p">(</span><span class="mf">1.0</span><span class="p">)</span>  <span class="c1"># give some buffer time for retrieving data
+</span>        <span class="bp">self</span><span class="p">.</span><span class="n">serialConnection</span><span class="p">.</span><span class="n">reset_input_buffer</span><span class="p">()</span>
+         
+        <span class="n">angYgir_prev</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="k">while</span> <span class="p">(</span><span class="bp">self</span><span class="p">.</span><span class="n">isRun</span><span class="p">):</span>
+            <span class="bp">self</span><span class="p">.</span><span class="n">serialConnection</span><span class="p">.</span><span class="n">readinto</span><span class="p">(</span><span class="bp">self</span><span class="p">.</span><span class="n">rawData</span><span class="p">)</span>
+            <span class="bp">self</span><span class="p">.</span><span class="n">serialConnection</span><span class="p">.</span><span class="n">readinto</span><span class="p">(</span><span class="bp">self</span><span class="p">.</span><span class="n">rawData2</span><span class="p">)</span>
+            <span class="bp">self</span><span class="p">.</span><span class="n">serialConnection</span><span class="p">.</span><span class="n">readinto</span><span class="p">(</span><span class="bp">self</span><span class="p">.</span><span class="n">rawData3</span><span class="p">)</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="p">.</span><span class="n">corregir</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+                <span class="bp">self</span><span class="p">.</span><span class="n">serialConnection</span><span class="p">.</span><span class="n">read</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+                <span class="k">print</span><span class="p">(</span><span class="s">"Corrigiendo Sincronización"</span><span class="p">)</span>
+                <span class="bp">self</span><span class="p">.</span><span class="n">corregir</span> <span class="o">=</span> <span class="mi">0</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="c1"># Convertir a float desde bytes
+</span>                <span class="n">dataFloat</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">struct</span><span class="p">.</span><span class="n">unpack</span><span class="p">(</span><span class="s">'h'</span><span class="p">,</span> <span class="bp">self</span><span class="p">.</span><span class="n">rawData</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span><span class="o">*</span><span class="bp">self</span><span class="p">.</span><span class="n">rango</span><span class="o">/</span><span class="bp">self</span><span class="p">.</span><span class="n">sensibilidad</span><span class="p">)</span> <span class="c1"># Aceleración en X
+</span>                <span class="n">dataFloat2</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">struct</span><span class="p">.</span><span class="n">unpack</span><span class="p">(</span><span class="s">'h'</span><span class="p">,</span> <span class="bp">self</span><span class="p">.</span><span class="n">rawData2</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span><span class="o">*</span><span class="bp">self</span><span class="p">.</span><span class="n">rango</span><span class="o">/</span><span class="bp">self</span><span class="p">.</span><span class="n">sensibilidad</span><span class="p">)</span> <span class="c1"># Aceleración en Z
+</span>                <span class="n">dataFloat3</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">struct</span><span class="p">.</span><span class="n">unpack</span><span class="p">(</span><span class="s">'h'</span><span class="p">,</span> <span class="bp">self</span><span class="p">.</span><span class="n">rawData3</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span><span class="o">/</span><span class="mi">131</span><span class="p">)</span> <span class="c1"># Velocidad Angular en Y
+</span>                <span class="c1"># Filtrado Exponencial
+</span>                <span class="bp">self</span><span class="p">.</span><span class="n">dataFiltada</span> <span class="o">=</span> <span class="bp">self</span><span class="p">.</span><span class="n">EMA_ALPHA</span> <span class="o">*</span> <span class="n">dataFloat</span> <span class="o">+</span> <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="bp">self</span><span class="p">.</span><span class="n">EMA_ALPHA</span><span class="p">)</span> <span class="o">*</span> <span class="bp">self</span><span class="p">.</span><span class="n">EMA_LP</span>
+                <span class="bp">self</span><span class="p">.</span><span class="n">dataFiltada2</span> <span class="o">=</span> <span class="bp">self</span><span class="p">.</span><span class="n">EMA_ALPHA</span> <span class="o">*</span> <span class="n">dataFloat2</span> <span class="o">+</span> <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="bp">self</span><span class="p">.</span><span class="n">EMA_ALPHA</span><span class="p">)</span> <span class="o">*</span> <span class="bp">self</span><span class="p">.</span><span class="n">EMA_LP2</span>
+                <span class="bp">self</span><span class="p">.</span><span class="n">dataFiltada3</span> <span class="o">=</span> <span class="bp">self</span><span class="p">.</span><span class="n">EMA_ALPHA</span> <span class="o">*</span> <span class="n">dataFloat3</span> <span class="o">+</span> <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="bp">self</span><span class="p">.</span><span class="n">EMA_ALPHA</span><span class="p">)</span> <span class="o">*</span> <span class="bp">self</span><span class="p">.</span><span class="n">EMA_LP3</span>
+                <span class="bp">self</span><span class="p">.</span><span class="n">EMA_LP</span> <span class="o">=</span> <span class="bp">self</span><span class="p">.</span><span class="n">dataFiltada</span> 
+                <span class="bp">self</span><span class="p">.</span><span class="n">EMA_LP2</span> <span class="o">=</span> <span class="bp">self</span><span class="p">.</span><span class="n">dataFiltada3</span> 
+                <span class="bp">self</span><span class="p">.</span><span class="n">EMA_LP3</span> <span class="o">=</span> <span class="bp">self</span><span class="p">.</span><span class="n">dataFiltada2</span> 
+                <span class="c1"># Agregar valores de aceleración en x al vector general
+</span>                <span class="bp">self</span><span class="p">.</span><span class="n">valores</span><span class="p">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="p">.</span><span class="n">dataFiltada</span><span class="p">)</span>
+                 
+                <span class="k">if</span> <span class="n">dataFloat</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                    <span class="n">dataFloat</span> <span class="o">=</span> <span class="mf">0.000001</span>
+                <span class="k">if</span> <span class="n">dataFloat2</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                    <span class="n">dataFloat2</span> <span class="o">=</span> <span class="mf">0.000001</span>
+                <span class="k">if</span> <span class="n">dataFloat3</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                    <span class="n">dataFloat3</span> <span class="o">=</span> <span class="mf">0.000001</span>       
+                <span class="c1"># Cálculo del ángulo de inclinación por medio de filtro complementario
+</span>                
+                <span class="n">angYacc</span> <span class="o">=</span> <span class="n">np</span><span class="p">.</span><span class="n">arctan</span><span class="p">(</span><span class="n">dataFloat2</span><span class="o">/</span><span class="n">dataFloat</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="mi">180</span> <span class="o">/</span> <span class="n">np</span><span class="p">.</span><span class="n">pi</span><span class="p">)</span>
+                <span class="c1">#self.valores.append(angYacc)
+</span>                 
+                 
+                <span class="n">t0</span> <span class="o">=</span> <span class="n">time</span><span class="p">.</span><span class="n">time</span><span class="p">()</span>
+                <span class="n">dt</span> <span class="o">=</span> <span class="n">time</span><span class="p">.</span><span class="n">time</span><span class="p">()</span> <span class="o">-</span> <span class="n">t0</span>
+                <span class="n">angYgir</span> <span class="o">=</span> <span class="bp">self</span><span class="p">.</span><span class="n">dataFiltada3</span> <span class="o">*</span> <span class="n">dt</span> <span class="o">+</span> <span class="n">angYgir_prev</span>
+                <span class="n">angYgir_prev</span> <span class="o">=</span> <span class="n">angYgir</span>
+                <span class="n">t0</span> <span class="o">=</span> <span class="n">dt</span>
+ 
+                <span class="c1"># Filtro Complementario
+</span>                <span class="n">angYtotal</span> <span class="o">=</span> <span class="mf">0.98</span> <span class="o">*</span> <span class="n">angYgir</span> <span class="o">+</span> <span class="mf">0.02</span> <span class="o">*</span> <span class="n">angYacc</span>
+                <span class="n">x</span> <span class="o">=</span> <span class="n">np</span><span class="p">.</span><span class="n">tan</span><span class="p">(</span><span class="n">angYtotal</span><span class="p">)</span> <span class="o">*</span> <span class="mf">0.8</span>
+                <span class="c1">#print(angYtotal)
+</span>                <span class="bp">self</span><span class="p">.</span><span class="n">valores2</span><span class="p">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="p">.</span><span class="n">dataFiltada3</span><span class="p">)</span>
+                <span class="bp">self</span><span class="p">.</span><span class="n">isReceiving</span> <span class="o">=</span> <span class="bp">True</span>   
+ 
+  
+    <span class="k">def</span> <span class="nf">close</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="p">.</span><span class="n">isRun</span> <span class="o">=</span> <span class="bp">False</span>
+        <span class="bp">self</span><span class="p">.</span><span class="n">thread</span><span class="p">.</span><span class="n">join</span><span class="p">()</span>
+        <span class="bp">self</span><span class="p">.</span><span class="n">serialConnection</span><span class="p">.</span><span class="n">close</span><span class="p">()</span>
+        <span class="k">print</span><span class="p">(</span><span class="s">'Disconnected...'</span><span class="p">)</span>
+
+</code></pre></div></div>
+<h2 id="gui--kivy-garden">GUI : Kivy Garden</h2>
+
+<p>Para la interface gráfica utilicé el framework Kivy, que ya venía usando para otros proyectos. Tiene una serie de desarrollos muy interesantes para hacer aplicaciones que son multiplataforma (Windows, Linux, macOS, Android, iOS). Básicamente se trata de un conjunto de Widgets con determinadas funciones.</p>
+
+<p>Interfaz Gráfica</p>
+
+<p><img src="./assets/img/interface.png" alt="Interface" /></p>
+
+<p>La página oficial del proyecto Kivy es esta : https://kivy.org
+El repo en Github: https://github.com/kivy/kivy
+También utilicé Kivy Garden, un proyecto no oficial complementario a Kivy con varias “Flowers” (Widgets) interesantes: https://kivy-garden.github.io/</p>
+
+<p>A su vez, recomiendo el Canal de Youtube de Erik Sandberg, que fue lo que utilicé yo para comenzar con Kivy.</p>
+
+<p>La aplicación está basada en un Widget de Garden llamado Graph y en un timer llamado Kivy-Clock. En el thread principal voy actualizando los diferentes gráficos con los datos que almaceno en una variable desde el thread de serialización.</p>
+
+<p>El código de la interface gráfica está hecho en un formato llamado Lenguage Kv, que podemos considerar una especie de CSS para nuestro PHP que sería Python. Con el lenguaje Kv podemos separar la lógica del diseño, lo cual me parece conveniente.</p>
+
+<p><a href="./">back</a></p>
+:ET

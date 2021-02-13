@@ -1,0 +1,21 @@
+I"�<h1 id="hola--hello">Hola | <em>Hello</em></h1>
+
+<p>Mi nombre es Mariano y soy Ingeniero de Sonido. Soy docente de Acústica en la Universidad Nacional de Tres de Febrero y estoy orientado al Procesamiento Digital de Señales y Análisis de Datos.</p>
+
+<p>En este sitio podrán encontrar algunos proyectos para ambos rubros, fundamentalmente en Python, MATLAB, Arduino.</p>
+
+<p><em>My name is Mariano and I am a Sound Engineer. I am professor of Acoustics at the University of Tres de Febrero (Argentina). I am into digital signal processing and data sciece</em></p>
+
+<p><em>In this site, you will find some projects in both fields, mostly developed on Python, MATLAB, Arduino</em></p>
+
+<h1 id="proyectos--projects">Proyectos | <em>Projects</em></h1>
+
+<p><a href="http://marouxet.github.io/vibPythonMPU">Medición de vibraciones usando Python y acelerómetro mems MPU 6050</a>.
+<em>Measuring vibrations with Python and MPU 6050 MEMS acelerometer</em></p>
+
+<p><a href="http://marouxet.github.io/estacionarias">Simulación de ondas planas estacionarias en Python</a>.
+<em>Simulation of stationary plane waves in python</em></p>
+
+<p><a href="http://marouxet.github.io/tesis">Measuring Sound Scattering Coefficient according ISO 17497-1 on MATLAB</a></p>
+
+:ET
