@@ -13,23 +13,16 @@ _In this site, you will find some projects in both fields, mostly developed on P
 
 # Proyectos | _Projects_
 
-[Degree of separation between two actors](http://marouxet.github.io/cs50-degree).
+>[Degree of separation between two actors](http://marouxet.github.io/cs50-degree).   
+>_IA Algorithm that looks into IMDB database and finds how many “degrees of separation” apart two actors are using a breadth-first-search_
 
-_IA Algorithm that looks into IMDB database and finds how many “degrees of separation” apart two actors are using a breadth-first-search_
+>[Medición de vibraciones usando Python y acelerómetro mems MPU 6050](http://marouxet.github.io/vibPythonMPU).
+>_Measuring vibrations with Python and MPU 6050 MEMS acelerometer_
 
-[Medición de vibraciones usando Python y acelerómetro mems MPU 6050](http://marouxet.github.io/vibPythonMPU).
+>[Simulación de ondas planas estacionarias en Python](http://marouxet.github.io/estacionarias).
+>_Simulation of stationary plane waves in python_
 
-_Measuring vibrations with Python and MPU 6050 MEMS acelerometer_
-
-
-
-[Simulación de ondas planas estacionarias en Python](http://marouxet.github.io/estacionarias).
-
-_Simulation of stationary plane waves in python_
-
-
-
-[Measuring Sound Scattering Coefficient according ISO 17497-1 on MATLAB](http://marouxet.github.io/tesis).
+>[Measuring Sound Scattering Coefficient according ISO 17497-1 on MATLAB](http://marouxet.github.io/tesis).
 
 
 
