@@ -1,7 +1,7 @@
 ---
 layout: default
 ---
-# Degree of Separation between two actors
+# Degree of separation between two actors
 
 This is an implementation of a [breadth-first-search](https://en.wikipedia.org/wiki/Breadth-first_search) algorithm that looks in a local copy of the [IMDB](https://www.imdb.com/) database and to find the shortest path between two actors. 
 
