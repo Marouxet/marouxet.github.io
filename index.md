@@ -13,7 +13,7 @@ _In this site, you will find some projects in both fields, mostly developed on P
 
 # Proyectos | _Projects_
 
-
+[Degree of separation between two actors](http://marouxet.github.io/cs50-degree)_IA Algorithm that looks into IMDB database and finds how many “degrees of separation” apart two actors are using a breadth-first-search_
 
 [Medición de vibraciones usando Python y acelerómetro mems MPU 6050](http://marouxet.github.io/vibPythonMPU).
 _Measuring vibrations with Python and MPU 6050 MEMS acelerometer_
