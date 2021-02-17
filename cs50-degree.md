@@ -3,11 +3,11 @@ layout: default
 ---
 # Degree of Separation between two actors
 
-This is an implementation of a [breadth-first-search](https://en.wikipedia.org/wiki/Breadth-first_search) algorithm that looks in a local copy of the [IMDB](https://www.imdb.com/) databa and that finds the shortest path between two actors. 
+This is an implementation of a [breadth-first-search](https://en.wikipedia.org/wiki/Breadth-first_search) algorithm that looks in a local copy of the [IMDB](https://www.imdb.com/) database and to find the shortest path between two actors. 
 
 It was made for the Hardvard's Course [CS50’s Introduction to Artificial Intelligence with python](https://cs50.harvard.edu/ai/2020/). 
 
-## The idea (take from [Here](https://cs50.harvard.edu/ai/2020/projects/0/degrees/))
+## The idea (take from [here](https://cs50.harvard.edu/ai/2020/projects/0/degrees/))
 
 According to the [Six Degrees of Kevin Bacon game](https://en.wikipedia.org/wiki/Six_Degrees_of_Kevin_Bacon), anyone in the Hollywood film industry can be connected to Kevin Bacon within six steps, where each step consists of finding a film that two actors both starred in.
 
@@ -22,3 +22,6 @@ Look in my [repo](https://github.com/Marouxet/cs50/tree/degrees), download the f
 ```
 $ python degrees.py
 ```
+
+
+[back](./)
