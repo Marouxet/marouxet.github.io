@@ -9,5 +9,6 @@ https://www.jochenschulz.me/en/blog/rockwool-glasswool-hemp-best-absorber-materi
 
 https://doc.comsol.com/5.5/doc/com.comsol.help.aco/aco_ug_pressure.05.005.html
 
+https://www.math2market.com/Publications/1970Delany-Bazley.pdf
 
 [back](./)
