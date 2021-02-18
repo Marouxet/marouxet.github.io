@@ -10,6 +10,7 @@ Utilizando la libraría _pyqtgraph_, generamos una animación de una onda senoid
 * Impedancia Infinita 
 * Impedancia cero
 * Impedancia de material absorbente 
+En este caso, también implementa un [objeto donde se calcula la impedancia del material absorbente](https://marouxet.github.iu/matAbs), de acuerdo al modelo de Delany-Bazley 
 * Impedancia de radiación
 
 ## Ejemplos de las simulaciones obtenidas
