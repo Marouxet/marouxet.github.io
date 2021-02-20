@@ -13,6 +13,9 @@ _In this site, you will find some projects in both fields, mostly developed on P
 
 # Proyectos | _Projects_
 
+>[Tic-Tac-Toe using Minimax algorithm](http://marouxet.github.io/cs50-tatetis)
+>_IA Algorithm thats plays Tic-Tac-Toe with you_
+
 >[Degree of separation between two actors](http://marouxet.github.io/cs50-degree).   
 >_IA Algorithm that looks into IMDB database and finds how many “degrees of separation” apart two actors are using a breadth-first-search_
 
