@@ -13,7 +13,7 @@ _In this site, you will find some projects in both fields, mostly developed on P
 
 # Proyectos | _Projects_
 
->[Tic-Tac-Toe using Minimax algorithm](http://marouxet.github.io/cs50-tatetis)
+>[Tic-Tac-Toe using Minimax algorithm](http://marouxet.github.io/cs50-tateti)
 >_IA Algorithm thats plays Tic-Tac-Toe with you_
 
 >[Degree of separation between two actors](http://marouxet.github.io/cs50-degree).   
