@@ -10,7 +10,7 @@ This is an implementation of the Tic-Tac-Toe Game using a [Minimax](https://en.w
 
 ## Implementation
 
-There are two main files in this project: runner.py and tictactoe.py. Look in my [repo](https://github.com/Marouxet/cs50/tree/tictactoe) to download the files. 
+There are two main files in this project: runner.py and tictactoe.py. Look in my [repo](https://github.com/Marouxet/cs50/tree/00-tictactoe) to download the files. 
 
 runner.py has been implemented by CS50'S staff. It contains all of the code to run the graphical interface for the game.
 

@@ -13,6 +13,9 @@ _In this site, you will find some projects in both fields, mostly developed on P
 
 # Proyectos | _Projects_
 
+>[Minesweeper game using  proposicional logic](http://marouxet.github.io/cs50-buscaminas)
+>_IA Algorithm thats plays Minesweeper by itself_
+
 >[Tic-Tac-Toe using Minimax algorithm](http://marouxet.github.io/cs50-tateti)
 >_IA Algorithm thats plays Tic-Tac-Toe with you_
 
