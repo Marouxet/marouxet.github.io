@@ -15,8 +15,8 @@ _In this site, you will find some projects in both fields, mostly developed on P
 
 ## Data Science and Visualization 
 
->[Visualization of Air Routes from Argentina ](https://marouxet.github.io/VisualAeropuertos.html)
->_Data visualization base on_
+>[Visualization of argentinian Air Routes](https://marouxet.github.io/VisualAeropuertos.html)
+>_Data ELT and Plotting using python, pandas, seaborn, plotly, geopandas_
 
 
 ## Artificial Intelligence
