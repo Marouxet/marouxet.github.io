@@ -11,7 +11,7 @@ In this site, you will find some projects in both fields, mostly developed on Py
 
 ## Data Science, Visualization and Machine Learning
 
->[Detection of Traffic Signs using Neural Networks](https://marouxet.github.io/cs50-traffic)
+>[Traffic Sign Identification Using Deep Learning](https://marouxet.github.io/cs50-traffic)
 >_Training and testing a Convolutional Neural Network using Keras Tensorflow_
 
 >[Visualization of argentinian Air Routes](https://marouxet.github.io/VisualAeropuertos.html)

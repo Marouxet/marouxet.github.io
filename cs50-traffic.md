@@ -1,7 +1,7 @@
 ---
 layout: default
 ---
-# Data Science, Visualization and Machine Learning
+# Traffic Sign Identification Using Deep Learning
 
 This is an implementation of a [Convolutional Neural Network](https://en.wikipedia.org/wiki/Convolutional_neural_network) trained to identify between 43 different traffic signs. The database could be found [here](https://cdn.cs50.net/ai/2020/x/projects/5/gtsrb.zip). It was implemented using keras-Tensorflow and OpenCV-Python. 
 
