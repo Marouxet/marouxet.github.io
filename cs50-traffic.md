@@ -27,15 +27,17 @@ Several test were done to define some hyperparameters with the objective of incr
 First, the size of the CONV2D layer was tested: between 2x2, 3x3 and 5x5 pixels. The last option had the greatest accuracy(0.940 and 0.980)
 
 ![Figura1](./assets/img/Imagen1.png) 
+_Figure 01: accuracy vs kernel size in CONV2D layer (without vary any other parameter)_
 
 Then, several hidden layer were tested. Starting with one layer of 128 neurons, then testing  with two layers (it showed very poor accuracy, maybe due to the relatively small size of the dataset). Finally, one layer of 150 neurons was chosen.
 
-![Figura2](./assets/img/Imagen2.png) 
+![Figura2](./assets/img/Imagen3.png) 
+_Figure 02: accuracy vs hidden layer(s) (without vary any other parameter)_
 
 After that, the percentage of dropout was decreased from 0.5 to 0.35, because the network showed better accuracy and didn’t show over-fitting. 
 
-![Figura3](./assets/img/Imagen3.png) 
-
+![Figura3](./assets/img/Imagen4.png) 
+_Figure 03: accuracy vs dropout (without vary any other parameter)_
 
 ## How to use it
 
@@ -53,10 +55,9 @@ Then, run:
 
 ```
 $  python test.py [imagen] model.h5
-
 ```
 
-Here, there is a video with the training and test of the network:
+Here there is a video with the network's training and testing:
 
 [![IMAGE ALT TEXT](./assets/img/youtube.png)](https://www.youtube.com/watch?v=tZhdILlUHRY&t=14s "Neural Network - Mariano Arouxet")
 
