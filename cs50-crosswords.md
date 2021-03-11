@@ -115,6 +115,6 @@ To test other posibilities, I download a random list of words (2500) from  https
 █████████
 ```
 
-It's works!
+It works!
 
 [back](./)

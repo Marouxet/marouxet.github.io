@@ -9,7 +9,10 @@ In this site, you will find some projects in both fields, mostly developed on Py
 
 # Projects
 
-## Data Science and Visualization 
+## Data Science, Visualization and Machine Learning
+
+>[Detection of Traffic Signs using Neural Networks](https://marouxet.github.io/cs50-traffic)
+>_Training and testing a Convolutional Neural Network using Keras Tensorflow_
 
 >[Visualization of argentinian Air Routes](https://marouxet.github.io/VisualAeropuertos.html)
 >_Data ELT and Plotting using python, pandas, seaborn, plotly, geopandas_
