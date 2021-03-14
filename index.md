@@ -14,6 +14,9 @@ In this site, you will find some projects in both fields, mostly developed on Py
 >[Traffic Sign Identification Using Deep Learning](https://marouxet.github.io/cs50-traffic)
 >_Training and testing a Convolutional Neural Network using Keras Tensorflow_
 
+>[RRandom Forest Project with Random over-sampling ](https://marouxet.github.io/RandomForestProject.html)
+>_Training and testing a Random Forest Model and balancing unbalance dataset_
+
 >[Visualization of argentinian Air Routes](https://marouxet.github.io/VisualAeropuertos.html)
 >_Data ELT and Plotting using python, pandas, seaborn, plotly, geopandas_
 
