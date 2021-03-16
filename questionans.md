@@ -20,10 +20,17 @@ The boot performs two tasks: document retrieval and passage retrieval. This vers
 Using the [The Beatles' post on wikipedia](https://en.wikipedia.org/wiki/The_Beatles) as corpus, let's try some querys: 
 
 ```
-$ python python questions.py beatles/Query: when was let it be released?On 8 May 1970, Let It Be was released.
-$ python python questions.py beatles/Query: when does ringo starr join the band?Already contemplating Best's dismissal,[41] the Beatles replaced him in mid-August with Ringo Starr, who left Rory Storm and the Hurricanes to join them.
-$ python python questions.py beatles/Query: when was the first live performance in US? [91] They gave their first live US television performance two days later on The Ed Sullivan Show, watched by approximately 73 million viewers in over 23 million households,[92] or 34 percent of the American population.
+$ python python questions.py beatles/
+Query: when was let it be released?
+On 8 May 1970, Let It Be was released.
 
+$ python python questions.py beatles/
+Query: when does ringo starr join the band?
+Already contemplating Best's dismissal,[41] the Beatles replaced him in mid-August with Ringo Starr, who left Rory Storm and the Hurricanes to join them.
+
+$ python python questions.py beatles/
+Query: when was the first live performance in US? 
+They gave their first live US television performance two days later on The Ed Sullivan Show, watched by approximately 73 million viewers in over 23 million households,[92] or 34 percent of the American population.
 ```
 
 This version _needs_ some direct questions, because it answers by choosing the more related phrased in the text. However, it could happen that the more related phrase is not the best answer. However, this methodology could be useful to customer services if the corpus is opportunely prepared!
