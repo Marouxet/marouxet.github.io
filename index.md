@@ -11,6 +11,9 @@ In this site, you will find some projects in both fields, mostly developed on Py
 
 ## Data Science, Visualization and Machine Learning
 
+>[COVID-19 Vacunas en Argentina](https://marouxet.github.io/covid-vacunas.html)
+>_Dashboard en PowerBI sobre el estado de vacunación en Argentina a partir de datos oficiales_
+
 >[Traffic Sign Identification Using Deep Learning](https://marouxet.github.io/cs50-traffic)
 >_Training and testing a Convolutional Neural Network using Keras Tensorflow_
 
